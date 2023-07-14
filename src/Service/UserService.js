@@ -10,14 +10,13 @@ const postCreateUser = (name,job) =>{
 }
 
 const putEditUser = (name,job) =>{
-    return  axios.put("api/users",{name,job});
+    console.log(name)
+    return  axios.post("api/users",{name,job});
 }
 
 const deleteUser = (id) =>{
     return  axios.delete("api/users",{id});
 }
-
-
 
 
 export {FetchAllUser, postCreateUser, putEditUser, deleteUser};
