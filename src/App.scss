@@ -13,11 +13,19 @@ code {
 }
 
 .app-container{
-
     .add-new{
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
+}
 
+
+.Sort-header{
+  display: flex;
+  justify-content: space-between;
+    i{
+      cursor: pointer;
+      padding: 10 2px;
+    }
 }
