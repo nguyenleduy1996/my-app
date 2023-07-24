@@ -4,10 +4,15 @@ import './App.scss';
 import './components/Header';
 import './components/TableUser';
 import Header from './components/Header';
-import TableUser from './components/TableUser';
+
+import Home from './components/Home';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { BrowserRouter as Router, Switch, Route, Link, Routes } from 'react-router-dom';
+import TableUser from './components/TableUser';
+import Login from './components/Login';
+
 
 function App() {
   return (
@@ -15,7 +20,14 @@ function App() {
         <div className='app-container'>
           <Header />
           <Container>
-              <TableUser />
+          
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/User" element={<TableUser />} />
+                <Route path="/Login" element={<Login />} />
+     
+              </Routes>
+          
           </Container> 
        
         </div>

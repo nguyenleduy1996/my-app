@@ -1,6 +1,6 @@
 
 import { memo, useEffect, useState } from 'react';
-import {Table, Form} from 'react-bootstrap/';
+import {Table, Form, Row,Col, Container} from 'react-bootstrap/';
 import { FetchAllUser } from '../Service/UserService';
 import ReactPaginate from 'react-paginate';
 import ModelAddNew from './ModelAddNew';
@@ -9,6 +9,8 @@ import ModelUser from './ModelUser';
 import ModelDelete from './ModelDelete';
 import { Fade } from 'react-bootstrap';
 import debounce from 'lodash.debounce';
+import { CSVLink } from "react-csv";
+import Papa from "papaparse";
 
 
 
@@ -28,6 +30,7 @@ const TableUser = (props) =>{
     // sort
     const [SortBy, setSortBy] = useState("id");
     const [SortField, setSortField] = useState("desc");
+    const [dataExport, setDataExport] = useState([]);
     const handleClose = ()  =>{
     //   setIsShowModalAddNew(false)
     //   setIsShowModalEdit(false)
@@ -50,15 +53,12 @@ const TableUser = (props) =>{
             setListUser(res.data)
             setTotalUser(res.total)
             setTotalPages(res.total_pages)
-           
-
         }
     }
     const handlePageClick = (event) => {
         console.log(event);
         getUser(+event.selected+1);
         setPage(+event.selected+1)
-
 
     };
     const EditUser = (item) =>{
@@ -117,16 +117,70 @@ const TableUser = (props) =>{
             getUser(page);
         }
     },1000)
+    const checkNhetrc = (event, done) => {
+        let data = JSON.parse(JSON.stringify(listUser));
+        data.forEach(user => {
+          user.ID = user.id;
+          user.Email = user.email;
+          user["First Name"] = user.first_name;
+          user["Last Name"] = user.last_name;
+          delete user.email;
+          delete user.avatar;
+          delete user.first_name;
+          delete user.last_name;
+          delete user.id;
+        });
+        setDataExport(data);
+      };
+    const handleImportCSV = (event) => {
+        let file = event.target.files[0];
+        Papa.parse(file, {
+            complete: (result) => {
+              console.log('Parsed CSV data:', result.data);
+              // Ở đây, result.data chứa dữ liệu từ file CSV dưới dạng mảng.
+              // Bạn có thể xử lý dữ liệu hoặc lưu nó vào state của component.
+              console.log(result.data)
+            },
+            header: true, // Nếu file CSV có dòng tiêu đề, bạn có thể bật tùy chọn này để sử dụng tên cột làm key trong mảng.
+          });
+       
+    }
 
     return (<>
             <div className="my-3 add-new">
               <span> <b> list User:</b></span>
-                <button type="button" className="btn btn-danger"
-                  onClick={() => {addNewUser()}}
-                >Add</button>
+                <div>
+                <Container>
+                    <Row>
+                        <Col>
+                            <label htmlFor="File" className="btn btn-primary">
+                                Import
+                            </label>
+                            <Form.Control onChange={(event) => handleImportCSV(event)} id="File" hidden type="file" placeholder="Enter email" />
+                        </Col>
+                        <Col>
+                            <CSVLink
+                            asyncOnClick = {true}
+                            onClick={checkNhetrc}
+                            data={dataExport}
+                            filename={"my-file.csv"}
+                            className="btn btn-info"
+                            target="_blank"
+                            >
+                             Exort
+                            </CSVLink>
+                        </Col>
+                        <Col>
+                            <button type="button" className="btn btn-success"
+                            onClick={() => {addNewUser()}}
+                            >Add</button>
+                        </Col>
+                    </Row>
+                </Container>
+                </div>
             </div>
-        
-        <Form.Control type="text" placeholder="Normal text" onChange={(event) => {handleSearch(event)}} />          
+
+        <Form.Control type="text" placeholder="Search....." onChange={(event) => {handleSearch(event)}} />          
         <Table striped bordered hover>
             <thead>
                 <tr>
@@ -164,23 +218,23 @@ const TableUser = (props) =>{
             <tbody>
                 {listUser && listUser.length > 0 && 
                 listUser.map((item,index) => {
-                    return(
-                        <tr key={`user-${index}`}> 
-                            <td>{item.id}</td>
-                            <td>{item.email}</td>
-                            <td>{item.first_name}</td>
-                            <td>{item.last_name}</td>
-                            <td>
-                            <button type="button" className="btn btn-warning mx-3" 
-                                onClick={() => {EditUser(item)}}
-                                >Edit</button>
-                            <button type="button" className="btn btn-danger mx-3" 
-                                onClick={() => {DeleteUser(item)}}
-                                >Delete</button>
-                            </td>
-                        </tr>    
-                    )
-                })
+                        return(
+                            <tr key={`user-${index}`}> 
+                                <td>{item.id}</td>
+                                <td>{item.email}</td>
+                                <td>{item.first_name}</td>
+                                <td>{item.last_name}</td>
+                                <td>
+                                <button type="button" className="btn btn-warning mx-3" 
+                                    onClick={() => {EditUser(item)}}
+                                      >Edit</button>
+                                <button type="button" className="btn btn-danger mx-3" 
+                                    onClick={() => {DeleteUser(item)}}
+                                    >Delete</button>
+                                </td>
+                            </tr>    
+                        )
+                    })
                 }
               
             </tbody>
