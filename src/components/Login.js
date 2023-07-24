@@ -1,14 +1,22 @@
 import Button from 'react-bootstrap/Button';
-import { memo, useEffect, useState } from 'react';
+import {  useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import { loginAPI } from '../Service/UserService';
-import { ToastContainer, toast } from 'react-toastify';
+import {  toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 const Login = (props) =>{
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loadingAPI, setLoadingAPI] = useState(false);
-
+    const navigate = useNavigate();
+    useEffect(() => {
+        let token = localStorage.getItem("token");
+        if(token){
+            navigate("/")
+        }
+    },[])
     const handleLogin = async () => {
         
        if(!email || !password ){
@@ -20,9 +28,11 @@ const Login = (props) =>{
        let res = await loginAPI(email,password)
        if(res && res.token){
             localStorage.setItem("token", res.token)
+            navigate("/")
        }else{
-        toast.error("email password do not math")
-        setLoadingAPI(false)
+            if(res && res.status === 400){
+                toast.error(res.data.error);
+            }
        }
        setLoadingAPI(false)
     }
@@ -31,7 +41,7 @@ const Login = (props) =>{
     return (<>
          <Form>
             <Form.Group className="mb-3" controlId="formBasicEmail">
-                <Form.Label>Email address</Form.Label>
+                <Form.Label>Email address ( eve.holt@reqres.in )</Form.Label>
                 <Form.Control value={email} onChange={(event) =>{ setEmail(event.target.value)}} type="email" placeholder="Enter email" />
                 <Form.Text className="text-muted">
                 We'll never share your email with anyone else.
@@ -46,7 +56,7 @@ const Login = (props) =>{
                 <Form.Check type="checkbox" label="Check me out" />
             </Form.Group>
             <Button onClick={() => {handleLogin()}} variant="primary" type="button">
-               {loadingAPI && <i class="fas fa-spinner fa-spin"></i>}   Login
+               {loadingAPI && <i className="fas fa-spinner fa-spin"></i>}   Login
             </Button>
         </Form>
     </>)
